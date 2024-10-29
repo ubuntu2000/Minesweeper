@@ -1,8 +1,7 @@
-﻿
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-
+[RequireComponent(typeof(Tilemap))]
 public class Board : MonoBehaviour
 {
     public Tilemap tilemap { get; private set; }
@@ -21,58 +20,53 @@ public class Board : MonoBehaviour
     public Tile tileNum7;
     public Tile tileNum8;
 
-
-    public void Awake()
+    private void Awake()
     {
-        // Tham chiếu vào bất kỳ thành phần nào là Tilemap gán cho biến tilemap.
         tilemap = GetComponent<Tilemap>();
     }
 
-    public void Draw(Cell[,] state)
+    public void Draw(CellGrid grid)
     {
-        int width = state.GetLength(0);
-        int height = state.GetLength(1);
+        int width = grid.Width;
+        int height = grid.Height;
 
-        for(int x=0; x< width; x++)
+        for (int x = 0; x < width; x++)
         {
-            for(int y =1; y <height; y++)
+            for (int y = 0; y < height; y++)
             {
-                Cell cell = state[x, y];
+                Cell cell = grid[x, y];
                 tilemap.SetTile(cell.position, GetTile(cell));
             }
-        }    
-
-
-    }    
-
+        }
+    }
 
     private Tile GetTile(Cell cell)
     {
-        if(cell.revealed)
-        {
+        if (cell.revealed) {
             return GetRevealedTile(cell);
-        } else if(cell.flagaged)
-            {
+        } else if (cell.flagged) {
             return tileFlag;
-        }
-        else
-        {
+        } else if (cell.chorded) {
+            return tileEmpty;
+        } else {
             return tileUnknown;
-        }  
+        }
     }
+
     private Tile GetRevealedTile(Cell cell)
     {
         switch (cell.type)
         {
             case Cell.Type.Empty: return tileEmpty;
-            case Cell.Type.Mine: return tileMine;
-            case Cell.Type.Number: return GetNumberTile( cell);
+            case Cell.Type.Mine: return cell.exploded ? tileExploded : tileMine;
+            case Cell.Type.Number: return GetNumberTile(cell);
             default: return null;
         }
     }
+
     private Tile GetNumberTile(Cell cell)
     {
-        switch(cell.number)
+        switch (cell.number)
         {
             case 1: return tileNum1;
             case 2: return tileNum2;
@@ -83,10 +77,7 @@ public class Board : MonoBehaviour
             case 7: return tileNum7;
             case 8: return tileNum8;
             default: return null;
-
-
-        }    
-    }    
-
+        }
+    }
 
 }
