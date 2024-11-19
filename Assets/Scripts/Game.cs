@@ -18,7 +18,9 @@ public class Game : MonoBehaviour
     private bool gameover;
     // trạng thái biến tạo ra
     private bool generated;
-
+    public bool IsMobile;
+    public bool IsTouch;
+    private bool IsWIN;
     private void OnValidate()
     {
         mineCount = Mathf.Clamp(mineCount, 0, width * height);
@@ -28,6 +30,8 @@ public class Game : MonoBehaviour
     {
         Application.targetFrameRate = 60;
         board = GetComponentInChildren<Board>();
+        IsTouch = true;
+        IsMobile = true;
     }
 
     private void Start()
@@ -40,7 +44,7 @@ public class Game : MonoBehaviour
         StopAllCoroutines();
         // cammera vị trí /2 khung hình.
         Camera.main.transform.position = new Vector3(width / 2f, height / 2f, -10f);
-
+       
         gameover = false;
         generated = false;
         // Tạo bảng cell có chiều rộng và dài= 16
@@ -51,6 +55,25 @@ public class Game : MonoBehaviour
 
     private void Update()
     {
+
+         if (IsMobile == true)
+          {
+             PCInput();
+
+         }
+          else
+          {
+             TouchButton(); 
+
+         } 
+    }
+    public void NewGameButton()
+    {
+        NewGame();
+    }
+    // ham  PC
+    public void PCInput()
+    {
         if (Input.GetKeyDown(KeyCode.N) || Input.GetKeyDown(KeyCode.R) || Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space))
         {
             NewGame();
@@ -59,17 +82,59 @@ public class Game : MonoBehaviour
 
         if (!gameover)
         {
-            if (Input.GetMouseButtonDown(0)) {
+            if (Input.GetMouseButtonDown(0))
+            {
                 Reveal();
-            } else if (Input.GetMouseButtonDown(1)) {
+            }
+            else if (Input.GetMouseButtonDown(1))
+            {
                 Flag();
-            } else if (Input.GetMouseButton(2)) {
+            }
+            else if (Input.GetMouseButton(2))
+            {
                 Chord();
-            } else if (Input.GetMouseButtonUp(2)) {
+            }
+            else if (Input.GetMouseButtonUp(2))
+            {
                 Unchord();
             }
         }
     }
+        
+    
+        public void ClickButtonOpenCell()
+        {
+             IsTouch = true;
+         }
+        public void ClickButtonFlag()
+        {
+            IsTouch = false;
+        }
+        
+    // hàm này kéo nen void Update
+    public void TouchButton()
+    {
+        if (!gameover)
+        {
+            if (Input.touchCount > 0)
+            {
+                Touch touch = Input.GetTouch(0);
+                    if (touch.phase == TouchPhase.Began)
+                    {
+                        if (IsTouch == true)
+                        {
+                        Reveal();
+                        }else
+                        {
+                        Flag();
+                        }   
+                            
+                    }   
+            }
+        }    
+        
+    }
+        
     // Phuong thuc  ô chưa được mở
     private void Reveal()
     {
@@ -282,7 +347,7 @@ public class Game : MonoBehaviour
                 // (Nếu là ô hiện tại là ô empty và ô number) chưa  được mở và ô hiện tại là ô empty và ô number không phải là ô bom thì no win 
                 // All non-mine cells must be revealed to have won
                 if (cell.type != Cell.Type.Mine && !cell.revealed) {
-                    return; // no win
+                    return ; // no win
                 }
             }
         }
